@@ -26,15 +26,15 @@ func ExampleParseSize() {
 }
 
 func ExampleFormatSize() {
-	fmt.Println(mem.FormatSize(1*mem.MB, 'd', -1))
+	fmt.Println(mem.FormatSize(1*mem.MB, 'D', -1))
 	fmt.Println(mem.FormatSize(1*mem.MB+111*mem.KB, 'd', 2))
-	fmt.Println(mem.FormatSize(2*mem.TiB+512*mem.MiB, 'b', 4))
+	fmt.Println(mem.FormatSize(2*mem.TiB+512*mem.MiB, 'B', 4))
 
-	fmt.Println(mem.FormatSize(5*mem.MBit, 'i', -1))
-	fmt.Println(mem.FormatSize(200*mem.MBit, 'd', -1))
+	fmt.Println(mem.FormatSize(5*mem.MBit, 'I', -1))
+	fmt.Println(mem.FormatSize(200*mem.MBit, 'D', -1))
 	// Output:
 	// 1MB
-	// 1.11MB
+	// 1.11mb
 	// 2.0005TiB
 	// 5Mbit
 	// 25MB

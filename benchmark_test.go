@@ -14,7 +14,10 @@ func BenchmarkFormatSize(b *testing.B) {
 		}
 	}
 	b.Run("0b-d-∞", func(b *testing.B) { formatSize(0, 'd', -1, b) })
+	b.Run("1bit-d-∞", func(b *testing.B) { formatSize(1, 'i', -1, b) })
+	b.Run("10b-d-∞", func(b *testing.B) { formatSize(10, 'd', -1, b) })
 	b.Run("1mb-d-∞", func(b *testing.B) { formatSize(MB, 'd', -1, b) })
+	b.Run("-1mb-d-∞", func(b *testing.B) { formatSize(MB, 'd', -1, b) })
 	b.Run("1mb-b-∞", func(b *testing.B) { formatSize(MB, 'b', -1, b) })
 	b.Run("1mb-i-∞", func(b *testing.B) { formatSize(MB, 'i', -1, b) })
 	b.Run("1mb-b-4", func(b *testing.B) { formatSize(MB, 'd', 4, b) })
