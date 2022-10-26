@@ -97,64 +97,97 @@ func ParseSize(s string) (Size, error) {
 //
 // The format fmt specifies how to format the size s. Valid values
 // are:
-//   - 'd' formats s as "-ddd.dddddMB" using the decimal byte units.
-//   - 'b' formats s as "-ddd.dddddMiB" using the binary byte units.
-//   - 'i' formats s as "-ddd.dddddMbit" using the decimal bit units.
+//   - 'd' formats s as "-ddd.dddddmb" using the decimal byte units.
+//   - 'b' formats s as "-ddd.dddddmib" using the binary byte units.
+//   - 'i' formats s as "-ddd.dddddmbit" using the decimal bit units.
+//
+// In addition, 'D', 'B', 'I' format s similar to 'd', 'b' and 'i'
+// but with partially uppercase unit strings. In particular:
+//   - 'D' formats s as "-ddd.dddddMB" using the decimal byte units.
+//   - 'B' formats s as "-ddd.dddddMiB" using the binary byte units.
+//   - 'I' formats s as "-ddd.dddddMbit" using the decimal bit units.
 //
 // The precision prec controls the number of digits after the decimal
 // point printed by the 'd', 'b' and 'i' formats. The special precision
 // -1 uses the smallest number of digits necessary such that ParseSize
 // will return s exactly.
 func FormatSize(s Size, fmt byte, prec int) string {
+	if s == 0 { // Optimized path for the zero value
+		switch fmt {
+		case 'd', 'b':
+			return "0b"
+		case 'D', 'B':
+			return "0B"
+		case 'i':
+			return "0bit"
+		case 'I':
+			return "0Bit"
+		default:
+			return string([]byte{'%', fmt})
+		}
+	}
+
 	switch fmt {
-	case 'd':
+	case 'd', 'D':
+		var p, t, g, m, k, b string
+		if fmt == 'D' {
+			p, t, g, m, k, b = "PB", "TB", "GB", "MB", "KB", "B"
+		} else {
+			p, t, g, m, k, b = "pb", "tb", "gb", "mb", "kb", "b"
+		}
 		switch {
 		case s >= PB || s <= -PB:
-			return string(fmtSize(s, PB, prec, "PB"))
+			return string(fmtSize(s, PB, prec, p))
 		case s >= TB || s <= -TB:
-			return string(fmtSize(s, TB, prec, "TB"))
+			return string(fmtSize(s, TB, prec, t))
 		case s >= GB || s <= -GB:
-			return string(fmtSize(s, GB, prec, "GB"))
+			return string(fmtSize(s, GB, prec, g))
 		case s >= MB || s <= -MB:
-			return string(fmtSize(s, MB, prec, "MB"))
+			return string(fmtSize(s, MB, prec, m))
 		case s >= KB || s <= -KB:
-			return string(fmtSize(s, KB, prec, "KB"))
-		case s == 0:
-			return "0B"
+			return string(fmtSize(s, KB, prec, k))
 		default:
-			return strconv.FormatFloat(s.Bytes(), 'f', prec, 64) + "B"
+			return string(fmtSize(s, Byte, prec, b))
 		}
-	case 'b':
+	case 'b', 'B':
+		var p, t, g, m, k, b string
+		if fmt == 'B' {
+			p, t, g, m, k, b = "PiB", "TiB", "GiB", "MiB", "KiB", "B"
+		} else {
+			p, t, g, m, k, b = "pib", "tib", "gib", "mib", "kib", "b"
+		}
 		switch {
 		case s >= PiB || s <= -PiB:
-			return string(fmtSize(s, PiB, prec, "PiB"))
+			return string(fmtSize(s, PiB, prec, p))
 		case s >= TiB || s <= -TiB:
-			return string(fmtSize(s, TiB, prec, "TiB"))
+			return string(fmtSize(s, TiB, prec, t))
 		case s >= GiB || s <= -GiB:
-			return string(fmtSize(s, GiB, prec, "GiB"))
+			return string(fmtSize(s, GiB, prec, g))
 		case s >= MiB || s <= -MiB:
-			return string(fmtSize(s, MiB, prec, "MiB"))
+			return string(fmtSize(s, MiB, prec, m))
 		case s >= KiB || s <= -KiB:
-			return string(fmtSize(s, KiB, prec, "KiB"))
-		case s == 0:
-			return "0B"
+			return string(fmtSize(s, KiB, prec, k))
 		default:
-			return strconv.FormatFloat(s.Bytes(), 'f', prec, 64) + "B"
+			return string(fmtSize(s, Byte, prec, b))
 		}
-	case 'i':
+	case 'i', 'I':
+		var t, g, m, k, b string
+		if fmt == 'I' {
+			t, g, m, k, b = "Tbit", "Gbit", "Mbit", "Kbit", "Bit"
+		} else {
+			t, g, m, k, b = "tbit", "gbit", "mbit", "kbit", "bit"
+		}
 		switch {
 		case s >= TBit || s <= -TBit:
-			return string(fmtSize(s, TBit, prec, "Tbit"))
+			return string(fmtSize(s, TBit, prec, t))
 		case s >= GBit || s <= -GBit:
-			return string(fmtSize(s, GBit, prec, "Gbit"))
+			return string(fmtSize(s, GBit, prec, g))
 		case s >= MBit || s <= -MBit:
-			return string(fmtSize(s, MBit, prec, "Mbit"))
+			return string(fmtSize(s, MBit, prec, m))
 		case s >= KBit || s <= -KBit:
-			return string(fmtSize(s, KBit, prec, "Kbit"))
-		case s == 0:
-			return "0bit"
+			return string(fmtSize(s, KBit, prec, k))
 		default:
-			return strconv.FormatInt(int64(s), 10) + "bit"
+			return strconv.FormatInt(int64(s), 10) + b
 		}
 	default:
 		return string([]byte{'%', fmt})
@@ -201,6 +234,14 @@ func fmtSize(v, base Size, prec int, unit string) []byte {
 		}
 		rbuf := strconv.AppendFloat(nil, float64(r)/float64(base), 'f', prec, 64)
 		buf = make([]byte, 0, 4+prec+len(rbuf)+len(unit)) // The '.' is already included in rbuf
+		if v < 0 && m == 0 {
+			// When formatting a negative size like -4bit as -0.5b
+			// where the abs. value is small than the base,
+			// m = v / base will be zero.
+			// In this case, we have to add the minus sign manually
+			// since strconv.AppendInt(buf, 0, 10) will not add it.
+			buf = append(buf, '-')
+		}
 		buf = strconv.AppendInt(buf, int64(m), 10)
 		buf = append(buf, rbuf[1:]...)
 	}
@@ -218,7 +259,7 @@ func parseUnit(s string) (Size, bool) {
 		switch s {
 		case "b", "B":
 			return Byte, true
-		case "bit":
+		case "bit", "Bit":
 			return Bit, true
 		}
 	case 'k', 'K':

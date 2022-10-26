@@ -226,7 +226,7 @@ func (s Size) Round(m Size) Size {
 
 // String returns a string representing the size in the form "1.25MB".
 // The zero size formats as 0B.
-func (s Size) String() string { return FormatSize(s, 'd', -1) }
+func (s Size) String() string { return FormatSize(s, 'D', -1) }
 
 func lessThanHalf(x, y Size) bool {
 	return uint64(x)+uint64(x) < uint64(y)
