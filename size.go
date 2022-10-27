@@ -27,7 +27,7 @@
 //
 //	Unit (decimal) |    Amount      Unit (binary) |    Amount
 //	--------------------------      -------------------------
-//	          Byte |    8 Bit                Byte |
+//	          Byte |    8 Bit                Byte |    8 Bit
 //	            KB | 1000 Byte                KiB | 1024 Byte
 //	            MB | 1000 KB                  MiB | 1024 KiB
 //	            GB | 1000 MB                  GiB | 1024 MiB
@@ -48,12 +48,12 @@
 //	d := mem.FormatSize(1*mem.MB, 'd', -1) // "1mb"
 //	D := mem.FormatSize(1*mem.MB, 'D', -1) // "1MB"
 //	b := mem.FormatSize(1*mem.MB, 'b', -1) // "976.5625kib"
-//	b := mem.FormatSize(1*mem.MB, 'b', -1) // "976.5625KiB"
+//	B := mem.FormatSize(1*mem.MB, 'B', -1) // "976.5625KiB"
 //	i := mem.FormatSize(1*mem.MB, 'i', -1) // "1mbit"
 //	I := mem.FormatSize(1*mem.MB, 'I', -1) // "1Mbit"
 package mem
 
-// Common sizes used to measure internet and network speed.
+// Common sizes for measuring internet / network speed.
 const (
 	Bit  Size = 1
 	KBit      = 1000 * Bit
@@ -62,7 +62,7 @@ const (
 	TBit      = 1000 * GBit
 )
 
-// Common sizes used to measure memory and disk capacity.
+// Common sizes for measuring memory and disk capacity.
 //
 // There are two commonly used unit systems for measuring capacities.
 // The decimal unit of data uses the kilo, mega giga prefixes as
@@ -89,7 +89,7 @@ const (
 // To convert an integer of units to a Size, multiply:
 //
 //	megabytes := 10
-//	fmt.Print(mem.Size(megabytes)*mem.MB) // prints 10mb
+//	fmt.Print(mem.Size(megabytes)*mem.MB) // prints 10MB
 const (
 	Byte = 8 * Bit
 
