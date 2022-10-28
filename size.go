@@ -2,58 +2,9 @@
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
 
-// Package mem provides functionality for measuring and displaying
-// memory throughput and capacity.
-//
-// # Units
-//
-// The fundamental unit of data is the bit. For example, networking
-// speed is usually measured in bits per second. Large quantities of
-// bits are commonly displayed using the SI / decimal prefixes for
-// powers of 10:
-//
-//	Unit |    Amount
-//	----------------
-//	 Bit |    1
-//	Kbit | 1000 Bit
-//	Mbit | 1000 Kbit
-//	Gbit | 1000 Mbit
-//	Tbit | 1000 Gbit
-//
-// In contrast, storage capacity is usually measured in bytes.
-// For large quantities of bytes there are two commonly used
-// prefix scales - the SI / decimal prefixes for powers of 10
-// and the binary prefixes for powers of 2:
-//
-//	Unit (decimal) |    Amount      Unit (binary) |    Amount
-//	--------------------------      -------------------------
-//	          Byte |    8 Bit                Byte |    8 Bit
-//	            KB | 1000 Byte                KiB | 1024 Byte
-//	            MB | 1000 KB                  MiB | 1024 KiB
-//	            GB | 1000 MB                  GiB | 1024 MiB
-//	            TB | 1000 GB                  TiB | 1024 GiB
-//	            PB | 1000 TB                  PiB | 1024 TiB
-//
-// Most software and operating systems, like macOS or linux report
-// file sizes in decimal units. One prominent example that uses the
-// binary units is windows.
-//
-// # Formatting
-//
-// Sizes can be formatted and displayed in various units and with
-// various precisions. The formats 'd/D', 'b/B' and 'i/I' are used
-// for lower and uppercase decimal, binary and deciaml bit prefixes.
-// For example:
-//
-//	d := mem.FormatSize(1*mem.MB, 'd', -1) // "1mb"
-//	D := mem.FormatSize(1*mem.MB, 'D', -1) // "1MB"
-//	b := mem.FormatSize(1*mem.MB, 'b', -1) // "976.5625kib"
-//	B := mem.FormatSize(1*mem.MB, 'B', -1) // "976.5625KiB"
-//	i := mem.FormatSize(1*mem.MB, 'i', -1) // "1mbit"
-//	I := mem.FormatSize(1*mem.MB, 'I', -1) // "1Mbit"
 package mem
 
-// Common sizes for measuring internet / network speed.
+// Common sizes when measuring amounts of data in bits.
 const (
 	Bit  Size = 1
 	KBit      = 1000 * Bit
@@ -63,23 +14,6 @@ const (
 )
 
 // Common sizes for measuring memory and disk capacity.
-//
-// There are two commonly used unit systems for measuring capacities.
-// The decimal unit of data uses the kilo, mega giga prefixes as
-// multipliers of 1000. For example, 1000 byte = 1 kilobyte (KB) and
-// 1000 KB = 1 megabyte (MB). This definition has been incorporated
-// into the International System of Quantities. It is consistent
-// with other unit systems for computers, like CPU clock or networking
-// speeds.
-//
-// In contrast, the binary unit of data uses the kibi, mebi, gibi
-// prefixes as multipliers of 1024 or 2^10. For example,
-// 1024 byte = 1 kibibyte (KiB) and 1024 kibibyte = 1 mebibyte (MiB).
-// The binary unit of data is used by e.g. MS Windows for computer
-// memory like RAM or caches.
-//
-// Both, the binary and decimal unit of data, use the one byte (8 bit)
-// as base unit.
 //
 // To count the number of units in a Size, divide:
 //
@@ -113,32 +47,32 @@ const (
 	minSize Size = -1 << 63
 )
 
-// Size represents an amount of memory as int64 number of bits.
+// Size represents an amount of data as int64 number of bits.
 // The largest representable size is approximately one exabyte.
 type Size int64
 
-// Kilobits returns the size as floating point number of kilobits (KBit).
+// Kilobits returns the size as floating point number of kilobits (Kbit).
 func (s Size) Kilobits() float64 {
 	k := s / KBit
 	r := s % KBit
 	return float64(k) + float64(r)/1e3
 }
 
-// Megabits returns the size as floating point number of megabits (MBit).
+// Megabits returns the size as floating point number of megabits (Mbit).
 func (s Size) Megabits() float64 {
 	m := s / MBit
 	r := s % MBit
 	return float64(m) + float64(r)/1e6
 }
 
-// Gigabits returns the size as floating point number of gigabits (GBit).
+// Gigabits returns the size as floating point number of gigabits (Gbit).
 func (s Size) Gigabits() float64 {
 	g := s / GBit
 	r := s % GBit
 	return float64(g) + float64(r)/1e9
 }
 
-// Terabits returns the size as floating point number of terabits (TBit).
+// Terabits returns the size as floating point number of terabits (Tbit).
 func (s Size) Terabits() float64 {
 	t := s / TBit
 	r := s % TBit
@@ -272,6 +206,9 @@ func (s Size) Round(m Size) Size {
 	}
 	return MaxSize // overflow
 }
+
+// PerSecond converts the size to a bandwidth as size per second.
+func (s Size) PerSecond() Bandwidth { return Bandwidth(s) }
 
 // String returns a string representing the size in the form "1.25MB".
 // The zero size formats as 0B.
