@@ -7,7 +7,30 @@ package mem
 import (
 	"errors"
 	"strconv"
+	"strings"
 )
+
+// ParseBandwidth parses a bandwidth string. A bandwidth string
+// is a possibly signed decimal number with an optional
+// fraction and a unit suffix, such as "64KB/s", "1Mbit/s"
+// or "-1.05GiB/s".
+//
+// A string may be a bit, decimal or binary bandwidth representation.
+// Valid units are:
+//   - bit:     "bit/s", "kbit/s", "mbit/s", "gbit/s" and "tbit/s"
+//   - decimal: "b/s", "kb/s", "mb/s", "gb/s", "tb/s", "pb/s"
+//   - binary:  "b/s", "kib/s", "mib/s", "gib/s", "tib/s", "pib/s"
+func ParseBandwidth(s string) (Bandwidth, error) {
+	orig := s
+	if !strings.HasSuffix(s, "/s") {
+		return 0, errors.New("mem: invalid bandwidth '" + orig + "'")
+	}
+	size, err := ParseSize(s[:len(s)-2])
+	if err != nil {
+		return 0, errors.New("mem: invalid bandwidth '" + orig + "'")
+	}
+	return size.PerSecond(), nil
+}
 
 // ParseSize parses a size string. A size string is a
 // possibly signed decimal number with an optional
@@ -16,7 +39,7 @@ import (
 //
 // A string may be a bit, decimal or binary size representation.
 // Valid units are:
-//   - bit:     "bits", "kbits", "mbits", "gbits" and "tbits"
+//   - bit:     "bit", "kbit", "mbit", "gbit" and "tbit"
 //   - decimal: "b", "kb", "mb", "gb", "tb", "pb"
 //   - binary:  "b", "kib", "mib", "gib", "tib", "pib"
 func ParseSize(s string) (Size, error) {
@@ -90,6 +113,29 @@ func ParseSize(s string) (Size, error) {
 		}
 	}
 	return 0, errors.New("mem: invalid size '" + orig + "'")
+}
+
+// FormatBandwidth converts the bandwidth b to a string, according to
+// the format fmt and precision prec.
+//
+// The format fmt specifies how to format the bandwidth b. Valid values
+// are:
+//   - 'd' formats s as "-ddd.dddddmb/s" using the decimal byte units.
+//   - 'b' formats s as "-ddd.dddddmib/s" using the binary byte units.
+//   - 'i' formats s as "-ddd.dddddmbit/s" using the decimal bit units.
+//
+// In addition, 'D', 'B', 'I' format b similar to 'd', 'b' and 'i'
+// but with partially uppercase unit strings. In particular:
+//   - 'D' formats s as "-ddd.dddddMB/s" using the decimal byte units.
+//   - 'B' formats s as "-ddd.dddddMiB/s" using the binary byte units.
+//   - 'I' formats s as "-ddd.dddddMbit/s" using the decimal bit units.
+//
+// The precision prec controls the number of digits after the decimal
+// point printed by the 'd', 'b' and 'i' formats. The special precision
+// -1 uses the smallest number of digits necessary such that
+// ParseBandwidth will return b exactly.
+func FormatBandwidth(b Bandwidth, fmt byte, prec int) string {
+	return FormatSize(Size(b), fmt, prec) + "/s"
 }
 
 // FormatSize converts the size s to a string, according to the
