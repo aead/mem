@@ -4,15 +4,6 @@
 
 package mem
 
-// Common sizes when measuring amounts of data in bits.
-const (
-	Bit  Size = 1
-	KBit      = 1000 * Bit
-	MBit      = 1000 * KBit
-	GBit      = 1000 * MBit
-	TBit      = 1000 * GBit
-)
-
 // Common sizes for measuring memory and disk capacity.
 //
 // To count the number of units in a Size, divide:
@@ -25,7 +16,7 @@ const (
 //	megabytes := 10
 //	fmt.Print(mem.Size(megabytes)*mem.MB) // prints 10MB
 const (
-	Byte = 8 * Bit
+	Byte Size = 1
 
 	KB Size = 1000 * Byte
 	MB      = 1000 * KB
@@ -40,43 +31,51 @@ const (
 	PiB      = 1024 * TiB
 )
 
+// Common sizes when measuring amounts of data in bits.
 const (
-	// MaxSize is the largest representable size: 1024PiB - 1bit.
+	KBit Size = 125 * Byte
+	MBit      = 1000 * KBit
+	GBit      = 1000 * MBit
+	TBit      = 1000 * GBit
+)
+
+const (
+	// MaxSize is the largest representable size: 8192PiB - 1bit.
 	MaxSize Size = 1<<63 - 1
 
 	minSize Size = -1 << 63
 )
 
-// Size represents an amount of data as int64 number of bits.
-// The largest representable size is approximately one exabyte.
+// Size represents an amount of data as int64 number of bytes.
+// The largest representable size is approximately 8192 PiB.
 type Size int64
 
 // Kilobits returns the size as floating point number of kilobits (Kbit).
 func (s Size) Kilobits() float64 {
 	k := s / KBit
 	r := s % KBit
-	return float64(k) + float64(r)/1e3
+	return float64(k) + float64(r)/(1e3/8)
 }
 
 // Megabits returns the size as floating point number of megabits (Mbit).
 func (s Size) Megabits() float64 {
 	m := s / MBit
 	r := s % MBit
-	return float64(m) + float64(r)/1e6
+	return float64(m) + float64(r)/(1e6/8)
 }
 
 // Gigabits returns the size as floating point number of gigabits (Gbit).
 func (s Size) Gigabits() float64 {
 	g := s / GBit
 	r := s % GBit
-	return float64(g) + float64(r)/1e9
+	return float64(g) + float64(r)/(1e9/8)
 }
 
 // Terabits returns the size as floating point number of terabits (Tbit).
 func (s Size) Terabits() float64 {
 	t := s / TBit
 	r := s % TBit
-	return float64(t) + float64(r)/1e12
+	return float64(t) + float64(r)/(1e12/8)
 }
 
 // Bytes returns the size as floating point number of bytes.
@@ -90,70 +89,70 @@ func (s Size) Bytes() float64 {
 func (s Size) Kilobytes() float64 {
 	k := s / KB
 	r := s % KB
-	return float64(k) + float64(r)/(8*1e3)
+	return float64(k) + float64(r)/1e3
 }
 
 // Megabytes returns the size as floating point number of megabytes (MB).
 func (s Size) Megabytes() float64 {
 	m := s / MB
 	r := s % MB
-	return float64(m) + float64(r)/(8*1e6)
+	return float64(m) + float64(r)/1e6
 }
 
 // Gigabytes returns the size as floating point number of gigabytes (GB).
 func (s Size) Gigabytes() float64 {
 	g := s / GB
 	r := s % GB
-	return float64(g) + float64(r)/(8*1e9)
+	return float64(g) + float64(r)/1e9
 }
 
 // Terabytes returns the size as floating point number of terabytes (TB).
 func (s Size) Terabytes() float64 {
 	t := s / TB
 	r := s % TB
-	return float64(t) + float64(r)/(8*1e12)
+	return float64(t) + float64(r)/1e12
 }
 
 // Petabytes returns the size as floating point number of petabytes (PB).
 func (s Size) Petabytes() float64 {
 	p := s / PB
 	r := s % PB
-	return float64(p) + float64(r)/(8*1e15)
+	return float64(p) + float64(r)/1e15
 }
 
 // Kibibytes returns the size as floating point number of kibibytes (KiB).
 func (s Size) Kibibytes() float64 {
 	k := s / KiB
 	r := s % KiB
-	return float64(k) + float64(r)/(8*(1<<10))
+	return float64(k) + float64(r)/(1<<10)
 }
 
 // Mebibytes returns the size as floating point number of mebibytes (MiB).
 func (s Size) Mebibytes() float64 {
 	m := s / MiB
 	r := s % MiB
-	return float64(m) + float64(r)/(8*(1<<20))
+	return float64(m) + float64(r)/(1<<20)
 }
 
 // Gibibytes returns the size as floating point number of gibibytes (GiB).
 func (s Size) Gibibytes() float64 {
 	g := s / GiB
 	r := s % GiB
-	return float64(g) + float64(r)/(8*(1<<30))
+	return float64(g) + float64(r)/(1<<30)
 }
 
 // Tebibytes returns the size as floating point number of tebibytes (TiB).
 func (s Size) Tebibytes() float64 {
 	t := s / TiB
 	r := s % TiB
-	return float64(t) + float64(r)/(8*(1<<40))
+	return float64(t) + float64(r)/(1<<40)
 }
 
 // Pebibytes returns the size as floating point number of pebibytes (PiB).
 func (s Size) Pebibytes() float64 {
 	p := s / PiB
 	r := s % PiB
-	return float64(p) + float64(r)/(8*(1<<50))
+	return float64(p) + float64(r)/(1<<50)
 }
 
 // Abs returns the absolute value of s. As a special case, math.MinInt64 is

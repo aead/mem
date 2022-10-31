@@ -10,17 +10,15 @@ var sizeStringTests = []struct {
 	Size   Size
 	String string
 }{
-	{Size: 0, String: "0B"},                                    // 0
-	{Size: Bit, String: "0.125B"},                              // 1
-	{Size: Byte, String: "1B"},                                 // 2
-	{Size: MB, String: "1MB"},                                  // 3
-	{Size: -MB, String: "-1MB"},                                // 4
-	{Size: MiB, String: "1.048576MB"},                          // 5
-	{Size: MBit, String: "125KB"},                              // 6
-	{Size: 5*TB + 640*GB + 509*MB, String: "5.640509TB"},       // 7
-	{Size: -1*MB - 825*KB, String: "-1.825MB"},                 // 8
-	{Size: 1000*PB + Bit, String: "1000.000000000000000125PB"}, // 9
-	{Size: 1000*PB + Byte, String: "1000.000000000000001PB"},   // 10
+	{Size: 0, String: "0B"},                                  // 0
+	{Size: Byte, String: "1B"},                               // 2
+	{Size: MB, String: "1MB"},                                // 3
+	{Size: -MB, String: "-1MB"},                              // 4
+	{Size: MiB, String: "1.048576MB"},                        // 5
+	{Size: MBit, String: "125KB"},                            // 6
+	{Size: 5*TB + 640*GB + 509*MB, String: "5.640509TB"},     // 7
+	{Size: -1*MB - 825*KB, String: "-1.825MB"},               // 8
+	{Size: 1000*PB + Byte, String: "1000.000000000000001PB"}, // 10
 }
 
 func TestSize_String(t *testing.T) {
@@ -44,8 +42,6 @@ var sizeAbsTests = []struct {
 	Abs  Size
 }{
 	{Size: 0, Abs: 0},                 // 0
-	{Size: 1 * Bit, Abs: 1 * Bit},     // 1
-	{Size: -1 * Bit, Abs: 1 * Bit},    // 2
 	{Size: -1 * Byte, Abs: 1 * Byte},  // 3
 	{Size: minSize, Abs: MaxSize},     // 4
 	{Size: minSize + 1, Abs: MaxSize}, // 5
@@ -81,11 +77,6 @@ var sizeTruncateTests = []struct {
 		Size:  1*MB + 500*KB,
 		Mod:   1 * MB,
 		Trunc: 1 * MB,
-	},
-	{ // 4
-		Size:  11*KB + 7*Bit,
-		Mod:   11 * KB,
-		Trunc: 11 * KB,
 	},
 	{ // 5
 		Size:  -(12*GiB + 5*MiB + 7*Byte),
@@ -204,15 +195,6 @@ var sizeByteTests = []struct {
 	TB    float64
 	PB    float64
 }{
-	{ // 0
-		Size:  1 * Bit,
-		Bytes: 0.125,
-		KB:    0.000125,
-		MB:    0.000000125,
-		GB:    0.000000000125,
-		TB:    0.000000000000125,
-		PB:    0.000000000000000125,
-	},
 	{ // 1
 		Size:  1 * Byte,
 		Bytes: 1,
@@ -221,15 +203,6 @@ var sizeByteTests = []struct {
 		GB:    0.000000001,
 		TB:    0.000000000001,
 		PB:    0.000000000000001,
-	},
-	{ // 2
-		Size:  1*Byte + 3*Bit,
-		Bytes: 1.375,
-		KB:    0.001375,
-		MB:    0.000001375,
-		GB:    0.000000001375,
-		TB:    0.000000000001375,
-		PB:    0.000000000000001375,
 	},
 	{ // 3
 		Size:  1*KB + 172*Byte,
@@ -257,15 +230,6 @@ var sizeByteTests = []struct {
 		GB:    0.012000271,
 		TB:    0.000012000271,
 		PB:    0.000000012000271,
-	},
-	{ // 6
-		Size:  542*GB + 1*MB + 17*KB + 859*Byte + 4*Bit,
-		Bytes: 542001017859.5,
-		KB:    542001017.8595,
-		MB:    542001.0178595,
-		GB:    542.0010178595,
-		TB:    0.5420010178595,
-		PB:    0.0005420010178595,
 	},
 	{ // 7
 		Size:  117*TB + 4*KB,
@@ -326,53 +290,11 @@ var sizeBitTests = []struct {
 	GBits float64
 	TBits float64
 }{
-	{ // 0
-		Size:  1 * Bit,
-		KBits: 0.001,
-		MBits: 0.000001,
-		GBits: 0.000000001,
-		TBits: 0.000000000001,
-	},
 	{ // 1
 		Size:  1 * KBit,
 		KBits: 1,
 		MBits: 0.001,
 		GBits: 0.000001,
 		TBits: 0.000000001,
-	},
-	{ // 2
-		Size:  1*KBit + 512*Bit,
-		KBits: 1.512,
-		MBits: 0.001512,
-		GBits: 0.000001512,
-		TBits: 0.000000001512,
-	},
-	{ // 3
-		Size:  64*KBit + 375*Bit,
-		KBits: 64.375,
-		MBits: 0.064375,
-		GBits: 0.000064375,
-		TBits: 0.000000064375,
-	},
-	{ // 4
-		Size:  1*MBit + 784*KBit + 63*Bit,
-		KBits: 1784.063,
-		MBits: 1.784063,
-		GBits: 0.001784063,
-		TBits: 0.000001784063,
-	},
-	{ // 5
-		Size:  12*GBit + 632*MBit + 76*KBit + 901*Bit,
-		KBits: 12632076.901,
-		MBits: 12632.076901,
-		GBits: 12.632076901,
-		TBits: 0.012632076901,
-	},
-	{ // 6
-		Size:  402*TBit + 551*GBit + 209*MBit + 811*KBit + 4*Bit,
-		KBits: 402551209811.004,
-		MBits: 402551209.811004,
-		GBits: 402551.209811004,
-		TBits: 402.551209811004,
 	},
 }

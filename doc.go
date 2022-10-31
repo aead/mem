@@ -43,14 +43,12 @@
 // # Formatting
 //
 // Sizes and bandwidths can be formatted and displayed in various
-// units and with various precisions. The formats 'd/D', 'b/B' and
-// 'i/I' are used for lower and uppercase decimal, binary and deciaml
-// bit prefixes. For example:
+// units and with various precisions. The formats 'd/D' and 'b/B'
+// are used for lower and uppercase decimal and binary prefixes.
+// For example:
 //
 //	d := mem.FormatSize(1*mem.MB, 'd', -1) // "1mb"
 //	D := mem.FormatSize(1*mem.MB, 'D', -1) // "1MB"
 //	b := mem.FormatSize(1*mem.MB, 'b', -1) // "976.5625kib"
 //	B := mem.FormatSize(1*mem.MB, 'B', -1) // "976.5625KiB"
-//	i := mem.FormatSize(1*mem.MB, 'i', -1) // "1mbit"
-//	I := mem.FormatSize(1*mem.MB, 'I', -1) // "1Mbit"
 package mem

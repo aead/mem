@@ -12,12 +12,10 @@ import (
 
 // ParseBandwidth parses a bandwidth string. A bandwidth string
 // is a possibly signed decimal number with an optional
-// fraction and a unit suffix, such as "64KB/s", "1Mbit/s"
-// or "-1.05GiB/s".
+// fraction and a unit suffix, such as "64KB/s" or "1MiB/s".
 //
-// A string may be a bit, decimal or binary bandwidth representation.
+// A string may be a decimal or binary bandwidth representation.
 // Valid units are:
-//   - bit:     "bit/s", "kbit/s", "mbit/s", "gbit/s" and "tbit/s"
 //   - decimal: "b/s", "kb/s", "mb/s", "gb/s", "tb/s", "pb/s"
 //   - binary:  "b/s", "kib/s", "mib/s", "gib/s", "tib/s", "pib/s"
 func ParseBandwidth(s string) (Bandwidth, error) {
@@ -34,12 +32,10 @@ func ParseBandwidth(s string) (Bandwidth, error) {
 
 // ParseSize parses a size string. A size string is a
 // possibly signed decimal number with an optional
-// fraction and a unit suffix, such as "64KB", "1Mbit"
-// or "-1.05GiB".
+// fraction and a unit suffix, such as "64KB" or "1MiB".
 //
-// A string may be a bit, decimal or binary size representation.
+// A string may be a decimal or binary size representation.
 // Valid units are:
-//   - bit:     "bit", "kbit", "mbit", "gbit" and "tbit"
 //   - decimal: "b", "kb", "mb", "gb", "tb", "pb"
 //   - binary:  "b", "kib", "mib", "gib", "tib", "pib"
 func ParseSize(s string) (Size, error) {
@@ -69,6 +65,7 @@ func ParseSize(s string) (Size, error) {
 					return 0, errors.New("mem: invalid size '" + orig + "'")
 				}
 				R := uint64(float64(r) / float64(l) * float64(unit))
+
 				if neg {
 					if m > 1<<63/uint64(unit) {
 						return 0, errors.New("mem: invalid size '" + orig + "'")
@@ -122,16 +119,14 @@ func ParseSize(s string) (Size, error) {
 // are:
 //   - 'd' formats s as "-ddd.dddddmb/s" using the decimal byte units.
 //   - 'b' formats s as "-ddd.dddddmib/s" using the binary byte units.
-//   - 'i' formats s as "-ddd.dddddmbit/s" using the decimal bit units.
 //
-// In addition, 'D', 'B', 'I' format b similar to 'd', 'b' and 'i'
-// but with partially uppercase unit strings. In particular:
+// In addition, 'D' and 'B' format b similar to 'd' and 'b' but with
+// partially uppercase unit strings. In particular:
 //   - 'D' formats s as "-ddd.dddddMB/s" using the decimal byte units.
 //   - 'B' formats s as "-ddd.dddddMiB/s" using the binary byte units.
-//   - 'I' formats s as "-ddd.dddddMbit/s" using the decimal bit units.
 //
 // The precision prec controls the number of digits after the decimal
-// point printed by the 'd', 'b' and 'i' formats. The special precision
+// point printed by the 'd' and 'b' formats. The special precision
 // -1 uses the smallest number of digits necessary such that
 // ParseBandwidth will return b exactly.
 func FormatBandwidth(b Bandwidth, fmt byte, prec int) string {
@@ -145,16 +140,14 @@ func FormatBandwidth(b Bandwidth, fmt byte, prec int) string {
 // are:
 //   - 'd' formats s as "-ddd.dddddmb" using the decimal byte units.
 //   - 'b' formats s as "-ddd.dddddmib" using the binary byte units.
-//   - 'i' formats s as "-ddd.dddddmbit" using the decimal bit units.
 //
-// In addition, 'D', 'B', 'I' format s similar to 'd', 'b' and 'i'
-// but with partially uppercase unit strings. In particular:
+// In addition, 'D' and 'B' format s similar to 'd' and 'b' but with
+// partially uppercase unit strings. In particular:
 //   - 'D' formats s as "-ddd.dddddMB" using the decimal byte units.
 //   - 'B' formats s as "-ddd.dddddMiB" using the binary byte units.
-//   - 'I' formats s as "-ddd.dddddMbit" using the decimal bit units.
 //
 // The precision prec controls the number of digits after the decimal
-// point printed by the 'd', 'b' and 'i' formats. The special precision
+// point printed by the 'd' and 'b' formats. The special precision
 // -1 uses the smallest number of digits necessary such that ParseSize
 // will return s exactly.
 func FormatSize(s Size, fmt byte, prec int) string {
@@ -164,10 +157,6 @@ func FormatSize(s Size, fmt byte, prec int) string {
 			return "0b"
 		case 'D', 'B':
 			return "0B"
-		case 'i':
-			return "0bit"
-		case 'I':
-			return "0Bit"
 		default:
 			return string([]byte{'%', fmt})
 		}
@@ -215,25 +204,6 @@ func FormatSize(s Size, fmt byte, prec int) string {
 			return string(fmtSize(s, KiB, prec, k))
 		default:
 			return string(fmtSize(s, Byte, prec, b))
-		}
-	case 'i', 'I':
-		var t, g, m, k, b string
-		if fmt == 'I' {
-			t, g, m, k, b = "Tbit", "Gbit", "Mbit", "Kbit", "Bit"
-		} else {
-			t, g, m, k, b = "tbit", "gbit", "mbit", "kbit", "bit"
-		}
-		switch {
-		case s >= TBit || s <= -TBit:
-			return string(fmtSize(s, TBit, prec, t))
-		case s >= GBit || s <= -GBit:
-			return string(fmtSize(s, GBit, prec, g))
-		case s >= MBit || s <= -MBit:
-			return string(fmtSize(s, MBit, prec, m))
-		case s >= KBit || s <= -KBit:
-			return string(fmtSize(s, KBit, prec, k))
-		default:
-			return strconv.FormatInt(int64(s), 10) + b
 		}
 	default:
 		return string([]byte{'%', fmt})
@@ -302,11 +272,8 @@ func parseUnit(s string) (Size, bool) {
 	}
 	switch s[0] {
 	case 'b', 'B':
-		switch s {
-		case "b", "B":
+		if s == "b" || s == "B" {
 			return Byte, true
-		case "bit", "Bit":
-			return Bit, true
 		}
 	case 'k', 'K':
 		switch s {
@@ -314,8 +281,6 @@ func parseUnit(s string) (Size, bool) {
 			return KB, true
 		case "kib", "KiB":
 			return KiB, true
-		case "kbit", "Kbit":
-			return KBit, true
 		}
 	case 'm', 'M':
 		switch s {
@@ -323,8 +288,6 @@ func parseUnit(s string) (Size, bool) {
 			return MB, true
 		case "mib", "MiB":
 			return MiB, true
-		case "mbit", "Mbit":
-			return MBit, true
 		}
 	case 'g', 'G':
 		switch s {
@@ -332,8 +295,6 @@ func parseUnit(s string) (Size, bool) {
 			return GB, true
 		case "gib", "GiB":
 			return GiB, true
-		case "gbit", "Gbit":
-			return GBit, true
 		}
 	case 't', 'T':
 		switch s {
@@ -341,8 +302,6 @@ func parseUnit(s string) (Size, bool) {
 			return TB, true
 		case "tib", "TiB":
 			return TiB, true
-		case "tbit", "Tbit":
-			return TBit, true
 		}
 	case 'p', 'P':
 		switch s {
