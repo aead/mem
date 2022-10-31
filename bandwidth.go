@@ -4,15 +4,6 @@
 
 package mem
 
-// Common bandwidths for measuring internet / network speed.
-const (
-	BitPerSecond  Bandwidth = 1
-	KBitPerSecond           = 1000 * BitPerSecond
-	MBitPerSecond           = 1000 * KBitPerSecond
-	GBitPerSecond           = 1000 * MBitPerSecond
-	TBitPerSecond           = 1000 * GBitPerSecond
-)
-
 // Common bandwidths for drive and memory throughput.
 //
 // To count the number of units in a Bandwidth, divide:
@@ -25,7 +16,7 @@ const (
 //	mbps := 10
 //	fmt.Print(mem.Bandwidth(mbps)*mem.MBytePerSecond) // prints 10MB
 const (
-	BytePerSecond Bandwidth = 8 * BitPerSecond
+	BytePerSecond Bandwidth = 1
 
 	KBytePerSecond Bandwidth = 1000 * BytePerSecond
 	MBytePerSecond           = 1000 * KBytePerSecond
@@ -36,6 +27,14 @@ const (
 	MiBytePerSecond           = 1024 * KiBytePerSecond
 	GiBytePerSecond           = 1024 * MiBytePerSecond
 	TiBytePerSecond           = 1024 * GiBytePerSecond
+)
+
+// Common bandwidths for measuring internet / network speed.
+const (
+	KBitPerSecond = 125 * BytePerSecond
+	MBitPerSecond = 1000 * KBitPerSecond
+	GBitPerSecond = 1000 * MBitPerSecond
+	TBitPerSecond = 1000 * GBitPerSecond
 )
 
 // Bandwidth represents an amount of data per second as

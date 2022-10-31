@@ -43,14 +43,11 @@ func ExampleFormatBandwidth() {
 	fmt.Println(mem.FormatBandwidth(1*mem.MBytePerSecond, 'D', -1))
 	fmt.Println(mem.FormatBandwidth(1*mem.MBytePerSecond+111*mem.KBytePerSecond, 'd', 2))
 	fmt.Println(mem.FormatBandwidth(2*mem.TiBytePerSecond+512*mem.MiBytePerSecond, 'B', 4))
-
-	fmt.Println(mem.FormatBandwidth(5*mem.MBitPerSecond, 'I', -1))
 	fmt.Println(mem.FormatBandwidth(200*mem.MBitPerSecond, 'D', -1))
 	// Output:
 	// 1MB/s
 	// 1.11mb/s
 	// 2.0005TiB/s
-	// 5Mbit/s
 	// 25MB/s
 }
 
@@ -59,13 +56,11 @@ func ExampleFormatSize() {
 	fmt.Println(mem.FormatSize(1*mem.MB+111*mem.KB, 'd', 2))
 	fmt.Println(mem.FormatSize(2*mem.TiB+512*mem.MiB, 'B', 4))
 
-	fmt.Println(mem.FormatSize(5*mem.MBit, 'I', -1))
 	fmt.Println(mem.FormatSize(200*mem.MBit, 'D', -1))
 	// Output:
 	// 1MB
 	// 1.11mb
 	// 2.0005TiB
-	// 5Mbit
 	// 25MB
 }
 
