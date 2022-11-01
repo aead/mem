@@ -11,20 +11,6 @@ import (
 	"aead.dev/mem"
 )
 
-func ExampleParseBandwidth() {
-	a, err := mem.ParseBandwidth("1.123MB/s")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	b, err := mem.ParseBandwidth("3.877MB/s")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	fmt.Println(a + b)
-	// Output:
-	// 5MB/s
-}
-
 func ExampleParseSize() {
 	a, err := mem.ParseSize("1.123MB")
 	if err != nil {
@@ -39,58 +25,69 @@ func ExampleParseSize() {
 	// 5MB
 }
 
-func ExampleFormatBandwidth() {
-	fmt.Println(mem.FormatBandwidth(1*mem.MBytePerSecond, 'D', -1))
-	fmt.Println(mem.FormatBandwidth(1*mem.MBytePerSecond+111*mem.KBytePerSecond, 'd', 2))
-	fmt.Println(mem.FormatBandwidth(2*mem.TiBytePerSecond+512*mem.MiBytePerSecond, 'B', 4))
-	fmt.Println(mem.FormatBandwidth(200*mem.MBitPerSecond, 'D', -1))
-	// Output:
-	// 1MB/s
-	// 1.11mb/s
-	// 2.0005TiB/s
-	// 25MB/s
-}
-
 func ExampleFormatSize() {
 	fmt.Println(mem.FormatSize(1*mem.MB, 'D', -1))
 	fmt.Println(mem.FormatSize(1*mem.MB+111*mem.KB, 'd', 2))
 	fmt.Println(mem.FormatSize(2*mem.TiB+512*mem.MiB, 'B', 4))
-
-	fmt.Println(mem.FormatSize(200*mem.MBit, 'D', -1))
 	// Output:
 	// 1MB
 	// 1.11mb
 	// 2.0005TiB
-	// 25MB
-}
-
-func ExampleSize_PerSecond() {
-	size := 1 * mem.MB
-	fmt.Println(size.PerSecond())
-	// Output:
-	// 1MB/s
 }
 
 func ExampleSize_String() {
 	fmt.Println(1 * mem.MB)
 	fmt.Println(1*mem.GB + 500*mem.MB)
 	fmt.Println(5*mem.KiB + 880*mem.Byte)
-	fmt.Println(40 * mem.GBit)
 	// Output:
 	// 1MB
 	// 1.5GB
 	// 6KB
-	// 5GB
 }
 
-func ExampleBandwidth_String() {
-	fmt.Println(1 * mem.MBytePerSecond)
-	fmt.Println(1*mem.GBytePerSecond + 500*mem.MBytePerSecond)
-	fmt.Println(5*mem.KiBytePerSecond + 880*mem.BytePerSecond)
-	fmt.Println(40 * mem.GBitPerSecond)
+func ExampleFormatBitSize() {
+	fmt.Println(mem.FormatBitSize(1*mem.MBit, 'D', -1))
+	fmt.Println(mem.FormatBitSize(1*mem.MBit+111*mem.KBit, 'd', 2))
+	fmt.Println(mem.FormatBitSize(2*mem.TBit+512*mem.MBit, 'D', 4))
 	// Output:
-	// 1MB/s
-	// 1.5GB/s
-	// 6KB/s
-	// 5GB/s
+	// 1Mbit
+	// 1.11mbit
+	// 2.0005Tbit
+}
+
+func ExampleParseBitSize() {
+	a, err := mem.ParseBitSize("1.123Mbit")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	b, err := mem.ParseBitSize("3.877Mbit")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println(a + b)
+	// Output:
+	// 5Mbit
+}
+
+func ExampleBitSize_Bytes() {
+	b := mem.MBit
+	fmt.Println(b.Bytes())
+
+	b = 1*mem.MBit + 4*mem.Bit
+	bytes, bits := b.Bytes()
+
+	fmt.Println(b == bytes.Bits()+bits && -7 <= bits && bits <= 7)
+	// Output:
+	// 125KB 0Bit
+	// true
+}
+
+func ExampleBitSize_String() {
+	fmt.Println(1 * mem.MBit)
+	fmt.Println(1*mem.GBit + 500*mem.MBit)
+	fmt.Println(5*mem.KBit + 880*mem.Bit)
+	// Output:
+	// 1Mbit
+	// 1.5Gbit
+	// 5.88Kbit
 }

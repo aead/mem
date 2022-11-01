@@ -7,10 +7,19 @@
 //
 // # Units
 //
-// The fundamental unit of data is the bit. For example, networking
-// speed is usually measured in bits per second. Large quantities of
-// bits are commonly displayed using the SI / decimal prefixes for
-// powers of 10:
+// Package mem defines two different types that represent quantities
+// of data - Size and BitSize. The former represents an amount of
+// data as bytes while the later represents an amount of data as
+// bits.
+//
+// Not each BitSize can be represented as Size and vice versa. For
+// example 65 bit is neither 8 bytes (64 bit) nor 9 bytes (72 bit).
+// However, Size and BitSize provide APIs for converting one to the
+// other.
+//
+// Some computer metrics - like networking speed - are usually
+// measured in bits. Large quantities of bits are commonly displayed
+// using the SI / decimal prefixes for powers of 10:
 //
 //	Unit |    Amount
 //	----------------
@@ -42,13 +51,25 @@
 //
 // # Formatting
 //
-// Sizes and bandwidths can be formatted and displayed in various
-// units and with various precisions. The formats 'd/D' and 'b/B'
-// are used for lower and uppercase decimal and binary prefixes.
+// Sizes can be formatted and displayed in various units and with
+// various precisions. The formats 'd/D' and 'b/B' are used for
+// lower and uppercase decimal and binary prefixes.
 // For example:
 //
-//	d := mem.FormatSize(1*mem.MB, 'd', -1) // "1mb"
-//	D := mem.FormatSize(1*mem.MB, 'D', -1) // "1MB"
-//	b := mem.FormatSize(1*mem.MB, 'b', -1) // "976.5625kib"
-//	B := mem.FormatSize(1*mem.MB, 'B', -1) // "976.5625KiB"
+// a := mem.FormatSize(1*mem.MB, 'd', -1)      // "1mb"
+// b := mem.FormatSize(1*mem.MB, 'D', -1)      // "1MB"
+// c := mem.FormatSize(1*mem.MB, 'b', -1)      // "976.5625kib"
+// d := mem.FormatSize(1*mem.MB, 'B', -1)      // "976.5625KiB"
+// e := mem.FormatBitSize(1*mem.MBit, 'd', -1) // 1mbit
+// f := mem.FormatBitSize(1*mem.MBit, 'D', -1) // 1Mbit
+//
+// # Parsing
+//
+// A string can be parsed as Size or BitSize using the
+// ParseSize or ParseBitSize functions. For example:
+//
+//	a, err := mem.ParseSize("1mb")
+//	b, err := mem.ParseSize("976.5625KiB")
+//	c, err := mem.ParseBitSize("1mbit")
+//	d, err := mem.ParseBitSize("25.473GBit")
 package mem
