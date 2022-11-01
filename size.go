@@ -4,6 +4,8 @@
 
 package mem
 
+import "math"
+
 // Common sizes for measuring memory and disk capacity.
 //
 // To count the number of units in a Size, divide:
@@ -31,58 +33,22 @@ const (
 	PiB      = 1024 * TiB
 )
 
-// Common sizes when measuring amounts of data in bits.
-const (
-	KBit Size = 125 * Byte
-	MBit      = 1000 * KBit
-	GBit      = 1000 * MBit
-	TBit      = 1000 * GBit
-)
-
-const (
-	// MaxSize is the largest representable size: 8192PiB - 1bit.
-	MaxSize Size = 1<<63 - 1
-
-	minSize Size = -1 << 63
-)
-
 // Size represents an amount of data as int64 number of bytes.
 // The largest representable size is approximately 8192 PiB.
 type Size int64
 
-// Kilobits returns the size as floating point number of kilobits (Kbit).
-func (s Size) Kilobits() float64 {
-	k := s / KBit
-	r := s % KBit
-	return float64(k) + float64(r)/(1e3/8)
-}
-
-// Megabits returns the size as floating point number of megabits (Mbit).
-func (s Size) Megabits() float64 {
-	m := s / MBit
-	r := s % MBit
-	return float64(m) + float64(r)/(1e6/8)
-}
-
-// Gigabits returns the size as floating point number of gigabits (Gbit).
-func (s Size) Gigabits() float64 {
-	g := s / GBit
-	r := s % GBit
-	return float64(g) + float64(r)/(1e9/8)
-}
-
-// Terabits returns the size as floating point number of terabits (Tbit).
-func (s Size) Terabits() float64 {
-	t := s / TBit
-	r := s % TBit
-	return float64(t) + float64(r)/(1e12/8)
-}
-
-// Bytes returns the size as floating point number of bytes.
-func (s Size) Bytes() float64 {
-	b := s / Byte
-	r := s % Byte
-	return float64(b) + float64(r)/8
+// Bits returns s as number of bits. As special cases, if s would
+// be greater resp. smaller than the max. resp. min. representable
+// BitSize it returns math.MaxInt64 resp. math.MinInt64.
+func (s Size) Bits() BitSize {
+	switch {
+	case s > math.MaxInt64/8:
+		return math.MaxInt64
+	case s < math.MinInt64/8:
+		return math.MinInt64
+	default:
+		return BitSize(8 * s)
+	}
 }
 
 // Kilobytes returns the size as floating point number of kilobytes (KB).
@@ -158,23 +124,13 @@ func (s Size) Pebibytes() float64 {
 // Abs returns the absolute value of s. As a special case, math.MinInt64 is
 // converted to math.MaxInt64.
 func (s Size) Abs() Size {
-	switch {
-	case s >= 0:
-		return s
-	case s == minSize:
-		return MaxSize
-	default:
-		return -s
-	}
+	return Size(abs(int64(s)))
 }
 
 // Truncate returns the result of rounding s towards zero to a multiple of m.
 // If m <= 0, Truncate returns s unchanged.
 func (s Size) Truncate(m Size) Size {
-	if m <= 0 {
-		return s
-	}
-	return s - s%m
+	return Size(truncate(int64(s), int64(m)))
 }
 
 // Round returns the result of rounding s to the nearest multiple of m.
@@ -183,36 +139,9 @@ func (s Size) Truncate(m Size) Size {
 // stored in a Size, Round returns the maximum (or minimum) size.
 // If m <= 0, Round returns s unchanged.
 func (s Size) Round(m Size) Size {
-	if m <= 0 {
-		return s
-	}
-	r := s % m
-	if s < 0 {
-		r = -r
-		if lessThanHalf(s, m) {
-			return s + r
-		}
-		if s1 := s - m + r; s1 < s {
-			return s1
-		}
-		return minSize // overflow
-	}
-	if lessThanHalf(r, m) {
-		return s - r
-	}
-	if s1 := s + m - r; s1 > s {
-		return s1
-	}
-	return MaxSize // overflow
+	return Size(round(int64(s), int64(m)))
 }
-
-// PerSecond converts the size to a bandwidth as size per second.
-func (s Size) PerSecond() Bandwidth { return Bandwidth(s) }
 
 // String returns a string representing the size in the form "1.25MB".
 // The zero size formats as 0B.
 func (s Size) String() string { return FormatSize(s, 'D', -1) }
-
-func lessThanHalf(x, y Size) bool {
-	return uint64(x)+uint64(x) < uint64(y)
-}
