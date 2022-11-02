@@ -21,6 +21,19 @@ func BenchmarkFormatSize(b *testing.B) {
 	b.Run("1mb-b-4", func(b *testing.B) { formatSize(MB, 'd', 4, b) })
 }
 
+func BenchmarkFormatBitSize(b *testing.B) {
+	formatSize := func(s BitSize, fmt byte, prec int, b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			FormatBitSize(s, fmt, prec)
+		}
+	}
+	b.Run("0bit-d-∞", func(b *testing.B) { formatSize(0, 'd', -1, b) })
+	b.Run("10bit-d-∞", func(b *testing.B) { formatSize(10, 'd', -1, b) })
+	b.Run("1mbit-d-∞", func(b *testing.B) { formatSize(MBit, 'd', -1, b) })
+	b.Run("-1mbit-d-∞", func(b *testing.B) { formatSize(MBit, 'd', -1, b) })
+}
+
 func BenchmarkParseSize(b *testing.B) {
 	parseSize := func(s string, b *testing.B) {
 		b.ReportAllocs()
