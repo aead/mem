@@ -4,7 +4,12 @@
 
 package mem
 
-import "testing"
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"testing"
+)
 
 func BenchmarkFormatSize(b *testing.B) {
 	formatSize := func(s Size, fmt byte, prec int, b *testing.B) {
@@ -58,4 +63,28 @@ func BenchmarkParseBitSize(b *testing.B) {
 	}
 	b.Run("0bit", func(b *testing.B) { parseSize("0bit", b) })
 	b.Run("8.888Kbit", func(b *testing.B) { parseSize("8.888Kbit", b) })
+}
+
+func BenchmarkProgressReader(b *testing.B) {
+	data := make([]byte, 1*MB)
+	r := bytes.NewReader(data)
+	p := &ProgressReader{
+		R:           r,
+		UpdateAfter: 200 * KB,
+		Update: func(p Progress) {
+			if p.N > p.Total {
+				panic(fmt.Sprintf("n=%d total=%d", p.N, p.Total))
+			}
+		},
+	}
+
+	b.ReportAllocs()
+	b.SetBytes(int64(1 * MB))
+	for i := 0; i < b.N; i++ {
+		if _, err := io.Copy(io.Discard, p); err != nil {
+			b.Fatal(err)
+		}
+		r.Reset(data)
+		p.n, p.total, p.err = 0, 0, nil
+	}
 }
