@@ -5,8 +5,12 @@
 package mem_test
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
+	"sync"
+	"time"
 
 	"aead.dev/mem"
 )
@@ -90,4 +94,80 @@ func ExampleBitSize_String() {
 	// 1Mbit
 	// 1.5Gbit
 	// 5.88Kbit
+}
+
+func ExampleProgressReader() {
+	r := bytes.NewReader(make([]byte, 1*mem.MB))
+	p := mem.NewProgressReader(r, 500*time.Millisecond, func(p mem.Progress) {
+		fmt.Printf("Copied %s/%s\n", p.Total, mem.Size(r.Size()))
+		if p.Done() {
+			fmt.Println("Done")
+		}
+	})
+	if _, err := io.Copy(io.Discard, p); err != nil {
+		log.Fatal(err)
+	}
+	// Output:
+	// Copied 8.192KB/1MB
+	// Copied 1MB/1MB
+	// Done
+}
+
+func ExampleProgressReader_UpdateAfter() {
+	r := bytes.NewReader(make([]byte, 1*mem.MB))
+	p := mem.NewProgressReader(r, 500*time.Millisecond, func(p mem.Progress) {
+		fmt.Printf("Copied %s/%s\n", p.Total, mem.Size(r.Size()))
+		if p.Done() {
+			fmt.Println("Done")
+		}
+	})
+	p.UpdateAfter = 200 * mem.KB
+	if _, err := io.Copy(io.Discard, p); err != nil {
+		log.Fatal(err)
+	}
+	// Output:
+	// Copied 8.192KB/1MB
+	// Copied 212.992KB/1MB
+	// Copied 417.792KB/1MB
+	// Copied 622.592KB/1MB
+	// Copied 827.392KB/1MB
+	// Copied 1MB/1MB
+	// Done
+}
+
+func ExampleProgressReader_concurrent() {
+	r := bytes.NewReader(make([]byte, 1*mem.MB))
+	progress := make(chan mem.Progress, 1)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		for p := range progress {
+			fmt.Printf("Copied %s/%s\n", p.Total, mem.Size(r.Size()))
+			if p.Done() {
+				fmt.Println("Done")
+				break
+			}
+		}
+	}()
+
+	p := mem.NewProgressReader(r, 500*time.Millisecond, func(p mem.Progress) {
+		// Sending the progress to a channel blocks reads if the
+		// channel is full. A select with a default cause reads
+		// won't block but progress updates will get dropped when
+		// the channel is full.
+		progress <- p
+	})
+	if _, err := io.Copy(io.Discard, p); err != nil {
+		log.Fatal(err)
+	}
+
+	close(progress)
+	wg.Wait() // Wait until all progress updates got printed
+	// Output:
+	// Copied 8.192KB/1MB
+	// Copied 1MB/1MB
+	// Done
 }
